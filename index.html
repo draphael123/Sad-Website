@@ -189,7 +189,7 @@
             font-weight: bold;
         }
         
-        .youtube-embed {
+        #youtubePlayer {
             width: 100%;
             height: 200px;
             border-radius: 10px;
@@ -233,15 +233,13 @@
     
     <div class="music-player">
         <div class="music-label">🎵 Background Music</div>
-        <iframe 
-            id="youtubePlayer"
-            class="youtube-embed"
-            src="https://www.youtube.com/embed/VmgrOGVcehE?autoplay=1&loop=1&playlist=VmgrOGVcehE&mute=1&controls=1&modestbranding=1&rel=0&enablejsapi=1"
-            allow="autoplay; encrypted-media"
-            allowfullscreen>
-        </iframe>
+        <div id="youtubePlayer"></div>
         <button class="music-toggle" onclick="toggleMusic()" id="musicToggle">🔊 Unmute</button>
+        <button class="music-toggle" onclick="playMusic()" id="playBtn" style="margin-top: 5px; background: linear-gradient(45deg, #4ecdc4, #45b7d1);">▶️ Play Music</button>
     </div>
+    
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     
     <script>
         const jokes = {
@@ -343,27 +341,67 @@
             }
         }
         
+        let player;
         let isMuted = true; // Start muted for autoplay to work
         
+        // This function will be called when YouTube IFrame API is ready
+        // Must be in global scope for YouTube API to find it
+        window.onYouTubeIframeAPIReady = function() {
+            player = new YT.Player('youtubePlayer', {
+                height: '200',
+                width: '100%',
+                videoId: 'VmgrOGVcehE',
+                playerVars: {
+                    'autoplay': 1,
+                    'loop': 1,
+                    'playlist': 'VmgrOGVcehE',
+                    'mute': 1,
+                    'controls': 1,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'enablejsapi': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            // Player is ready, start playing
+            event.target.playVideo();
+            // Hide play button once player is ready
+            document.getElementById('playBtn').style.display = 'none';
+        }
+        
+        function onPlayerStateChange(event) {
+            // Handle player state changes if needed
+            if (event.data === YT.PlayerState.ENDED) {
+                player.playVideo(); // Loop the video
+            }
+        }
+        
+        function playMusic() {
+            if (player && player.playVideo) {
+                player.playVideo();
+                document.getElementById('playBtn').style.display = 'none';
+            }
+        }
+        
         function toggleMusic() {
-            const iframe = document.getElementById('youtubePlayer');
+            if (!player) return;
+            
             const toggleBtn = document.getElementById('musicToggle');
             
-            // Use YouTube iframe API to control mute/unmute
-            try {
-                iframe.contentWindow.postMessage('{"event":"command","func":"' + (isMuted ? 'unMute' : 'mute') + '","args":""}', '*');
-                isMuted = !isMuted;
-                toggleBtn.textContent = isMuted ? '🔊 Unmute' : '🔇 Mute';
-            } catch(e) {
-                // Fallback: reload iframe with different mute setting
-                const currentSrc = iframe.src;
-                if (isMuted) {
-                    iframe.src = currentSrc.replace('&mute=1', '&mute=0');
-                } else {
-                    iframe.src = currentSrc.replace('&mute=0', '&mute=1');
-                }
-                isMuted = !isMuted;
-                toggleBtn.textContent = isMuted ? '🔊 Unmute' : '🔇 Mute';
+            if (isMuted) {
+                player.unMute();
+                isMuted = false;
+                toggleBtn.textContent = '🔇 Mute';
+            } else {
+                player.mute();
+                isMuted = true;
+                toggleBtn.textContent = '🔊 Unmute';
             }
         }
         
