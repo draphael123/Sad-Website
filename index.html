@@ -221,12 +221,14 @@
         <h1>Momshies Website</h1>
         <div class="emoji">😄🎉✨</div>
         
+        <!-- Joke Counter - Prominently displayed at top -->
+        <div class="joke-counter-box" id="jokeCounter" style="margin: 20px 0; padding: 15px; background: linear-gradient(135deg, #4ecdc4 0%, #45b7d1 100%); border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); color: white; font-size: 1.1em; font-weight: bold; text-align: center;">Loading joke count...</div>
+        
         <div class="joke-container">
             <div class="joke-label">Daily Joke of the Day</div>
             <div class="joke-text" id="jokeText">Loading joke...</div>
             <div class="joke-translation" id="jokeTranslation" style="display: none;"></div>
             <div class="joke-language" id="jokeLanguage"></div>
-            <div class="joke-counter" id="jokeCounter" style="margin-top: 15px; font-size: 1em; color: #4ecdc4; font-weight: bold; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 10px;">Loading joke count...</div>
         </div>
         
         <button class="refresh-btn" onclick="getNewJoke()">Get New Joke! 🎭</button>
@@ -248,10 +250,47 @@
     <script>
         // Initialize jokes collection with static jokes and API integration
         let jokes = {
-            filipino: staticJokes.filipino || [],
-            bisaya: staticJokes.bisaya || [],
-            english: staticJokes.english || []
+            filipino: [],
+            bisaya: [],
+            english: []
         };
+        
+        // Initialize jokes from staticJokes or use fallback
+        function initializeJokes() {
+            if (typeof staticJokes !== 'undefined' && staticJokes) {
+                jokes.filipino = staticJokes.filipino ? [...staticJokes.filipino] : [];
+                jokes.bisaya = staticJokes.bisaya ? [...staticJokes.bisaya] : [];
+                jokes.english = staticJokes.english ? [...staticJokes.english] : [];
+            } else {
+                // Fallback: use inline jokes if jokes.js doesn't load
+                console.log('jokes.js not loaded, using fallback jokes');
+                jokes.filipino = [
+                    { text: "Bakit hindi pwedeng maglaro ng hide and seek ang mga baka? Kasi lahat sila, 'Moo!'", translation: "Why can't cows play hide and seek? Because they all say 'Moo!'" },
+                    { text: "Ano ang tawag sa kalabaw na nasa loob ng elevator? Kalabaw na elevator!", translation: "What do you call a carabao inside an elevator? A carabao in an elevator!" },
+                    { text: "Bakit masaya ang kalendaryo? Kasi marami siyang dates!", translation: "Why is the calendar happy? Because it has many dates!" },
+                    { text: "Ano ang favorite subject ng mga isda? Math! Kasi full of numbers ang dagat!", translation: "What's the fish's favorite subject? Math! Because the ocean is full of numbers!" },
+                    { text: "Bakit hindi pwedeng mag-joke ang mga bato? Kasi walang sense of humor!", translation: "Why can't stones tell jokes? Because they have no sense of humor!" }
+                ];
+                jokes.bisaya = [
+                    { text: "Ngano man dili pwede maglaro ang mga baka? Kay tanan sila, 'Moo!'", translation: "Why can't cows play? Because they all say 'Moo!'" },
+                    { text: "Unsa man ang tawag sa kalabaw nga naa sa sulod sa elevator? Kalabaw nga elevator!", translation: "What do you call a carabao inside an elevator? A carabao in an elevator!" },
+                    { text: "Ngano man masaya ang kalendaryo? Kay daghan siya'g dates!", translation: "Why is the calendar happy? Because it has many dates!" },
+                    { text: "Unsa man ang paborito nga subject sa mga isda? Math! Kay puno sa numbers ang dagat!", translation: "What's the fish's favorite subject? Math! Because the ocean is full of numbers!" },
+                    { text: "Ngano man dili pwede mag-joke ang mga bato? Kay walay sense of humor!", translation: "Why can't stones tell jokes? Because they have no sense of humor!" }
+                ];
+                jokes.english = [
+                    { text: "Why don't scientists trust atoms? Because they make up everything!", translation: null },
+                    { text: "Why did the scarecrow win an award? He was outstanding in his field!", translation: null },
+                    { text: "Why don't eggs tell jokes? They'd crack each other up!", translation: null },
+                    { text: "What do you call a fake noodle? An impasta!", translation: null },
+                    { text: "Why did the math book look so sad? Because it had too many problems!", translation: null },
+                    { text: "What's the best thing about Switzerland? I don't know, but the flag is a big plus!", translation: null },
+                    { text: "Why don't skeletons fight each other? They don't have the guts!", translation: null },
+                    { text: "What do you call a bear with no teeth? A gummy bear!", translation: null }
+                ];
+            }
+            console.log('Jokes initialized:', { filipino: jokes.filipino.length, bisaya: jokes.bisaya.length, english: jokes.english.length });
+        }
         
         // Cache for API-fetched jokes
         let apiJokeCache = {
@@ -410,11 +449,11 @@
             const english = jokes.english ? jokes.english.length : 0;
             
             const counterDiv = document.getElementById('jokeCounter');
-            counterDiv.innerHTML = `📚 Total Jokes: <strong>${total}</strong> (Filipino: ${filipino} | Bisaya: ${bisaya} | English: ${english})`;
+            counterDiv.innerHTML = `📚 <strong>Total Jokes: ${total}</strong> | Filipino: ${filipino} | Bisaya: ${bisaya} | English: ${english}`;
             
             if (total >= 1000) {
-                counterDiv.style.color = '#4ecdc4';
                 counterDiv.innerHTML += ' 🎉';
+                counterDiv.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
             }
         }
         
@@ -509,6 +548,21 @@
         
         // Load daily joke on page load
         window.onload = function() {
+            // Initialize jokes first
+            initializeJokes();
+            
+            // Add cached jokes
+            loadCachedJokes();
+            if (apiJokeCache.english.length > 0) {
+                jokes.english = [...jokes.english, ...apiJokeCache.english];
+            }
+            if (apiJokeCache.filipino.length > 0) {
+                jokes.filipino = [...jokes.filipino, ...apiJokeCache.filipino];
+            }
+            if (apiJokeCache.bisaya.length > 0) {
+                jokes.bisaya = [...jokes.bisaya, ...apiJokeCache.bisaya];
+            }
+            
             const dailyJoke = getDailyJoke();
             displayJoke(dailyJoke);
             createSparkles();
