@@ -226,6 +226,7 @@
             <div class="joke-text" id="jokeText">Loading joke...</div>
             <div class="joke-translation" id="jokeTranslation" style="display: none;"></div>
             <div class="joke-language" id="jokeLanguage"></div>
+            <div class="joke-counter" id="jokeCounter" style="margin-top: 15px; font-size: 0.9em; color: #666;">Loading joke count...</div>
         </div>
         
         <button class="refresh-btn" onclick="getNewJoke()">Get New Joke! 🎭</button>
@@ -241,33 +242,89 @@
     <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
     
+    <!-- Jokes Library -->
+    <script src="jokes.js"></script>
+    
     <script>
-        const jokes = {
-            filipino: [
-                { text: "Bakit hindi pwedeng maglaro ng hide and seek ang mga baka? Kasi lahat sila, 'Moo!'", translation: "Why can't cows play hide and seek? Because they all say 'Moo!'" },
-                { text: "Ano ang tawag sa kalabaw na nasa loob ng elevator? Kalabaw na elevator!", translation: "What do you call a carabao inside an elevator? A carabao in an elevator!" },
-                { text: "Bakit masaya ang kalendaryo? Kasi marami siyang dates!", translation: "Why is the calendar happy? Because it has many dates!" },
-                { text: "Ano ang favorite subject ng mga isda? Math! Kasi full of numbers ang dagat!", translation: "What's the fish's favorite subject? Math! Because the ocean is full of numbers!" },
-                { text: "Bakit hindi pwedeng mag-joke ang mga bato? Kasi walang sense of humor!", translation: "Why can't stones tell jokes? Because they have no sense of humor!" }
-            ],
-            bisaya: [
-                { text: "Ngano man dili pwede maglaro ang mga baka? Kay tanan sila, 'Moo!'", translation: "Why can't cows play? Because they all say 'Moo!'" },
-                { text: "Unsa man ang tawag sa kalabaw nga naa sa sulod sa elevator? Kalabaw nga elevator!", translation: "What do you call a carabao inside an elevator? A carabao in an elevator!" },
-                { text: "Ngano man masaya ang kalendaryo? Kay daghan siya'g dates!", translation: "Why is the calendar happy? Because it has many dates!" },
-                { text: "Unsa man ang paborito nga subject sa mga isda? Math! Kay puno sa numbers ang dagat!", translation: "What's the fish's favorite subject? Math! Because the ocean is full of numbers!" },
-                { text: "Ngano man dili pwede mag-joke ang mga bato? Kay walay sense of humor!", translation: "Why can't stones tell jokes? Because they have no sense of humor!" }
-            ],
-            english: [
-                { text: "Why don't scientists trust atoms? Because they make up everything!", translation: null },
-                { text: "Why did the scarecrow win an award? He was outstanding in his field!", translation: null },
-                { text: "Why don't eggs tell jokes? They'd crack each other up!", translation: null },
-                { text: "What do you call a fake noodle? An impasta!", translation: null },
-                { text: "Why did the math book look so sad? Because it had too many problems!", translation: null },
-                { text: "What's the best thing about Switzerland? I don't know, but the flag is a big plus!", translation: null },
-                { text: "Why don't skeletons fight each other? They don't have the guts!", translation: null },
-                { text: "What do you call a bear with no teeth? A gummy bear!", translation: null }
-            ]
+        // Initialize jokes collection with static jokes and API integration
+        let jokes = {
+            filipino: staticJokes.filipino || [],
+            bisaya: staticJokes.bisaya || [],
+            english: staticJokes.english || []
         };
+        
+        // Cache for API-fetched jokes
+        let apiJokeCache = {
+            english: [],
+            filipino: [],
+            bisaya: []
+        };
+        
+        // Load cached jokes from localStorage
+        function loadCachedJokes() {
+            try {
+                const cached = localStorage.getItem('jokeCache');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed.english) apiJokeCache.english = parsed.english;
+                    if (parsed.filipino) apiJokeCache.filipino = parsed.filipino;
+                    if (parsed.bisaya) apiJokeCache.bisaya = parsed.bisaya;
+                }
+            } catch (e) {
+                console.log('Could not load cached jokes');
+            }
+        }
+        
+        // Save jokes to cache
+        function saveJokesToCache() {
+            try {
+                localStorage.setItem('jokeCache', JSON.stringify(apiJokeCache));
+            } catch (e) {
+                console.log('Could not save jokes to cache');
+            }
+        }
+        
+        // Fetch jokes from API and add to collection
+        async function fetchAndAddJokes(language = 'english', count = 10) {
+            for (let i = 0; i < count; i++) {
+                try {
+                    const joke = await fetchJokeFromAPI(language);
+                    if (joke && joke.text) {
+                        if (!apiJokeCache[language]) apiJokeCache[language] = [];
+                        apiJokeCache[language].push(joke);
+                        jokes[language].push(joke);
+                    }
+                } catch (e) {
+                    // Continue if API fails
+                }
+            }
+            saveJokesToCache();
+        }
+        
+        // Initialize: Load cached jokes and fetch more if needed
+        loadCachedJokes();
+        
+        // Add cached jokes to main collection
+        if (apiJokeCache.english.length > 0) {
+            jokes.english = [...jokes.english, ...apiJokeCache.english];
+        }
+        if (apiJokeCache.filipino.length > 0) {
+            jokes.filipino = [...jokes.filipino, ...apiJokeCache.filipino];
+        }
+        if (apiJokeCache.bisaya.length > 0) {
+            jokes.bisaya = [...jokes.bisaya, ...apiJokeCache.bisaya];
+        }
+        
+        // Fetch more jokes in the background to build up to 1000+
+        // Fetch 50 jokes at a time, 20 times = 1000 jokes
+        setTimeout(() => {
+            fetchAndAddJokes('english', 50);
+        }, 1000);
+        
+        // Function to get total joke count
+        function getTotalJokeCount() {
+            return jokes.filipino.length + jokes.bisaya.length + jokes.english.length;
+        }
         
         function getDayOfYear() {
             const now = new Date();
@@ -295,6 +352,16 @@
             const languages = ['filipino', 'bisaya', 'english'];
             const language = languages[Math.floor(Math.random() * languages.length)];
             const languageJokes = jokes[language];
+            
+            if (!languageJokes || languageJokes.length === 0) {
+                // Fallback if no jokes available
+                return {
+                    text: "Loading more jokes...",
+                    translation: null,
+                    language: language.charAt(0).toUpperCase() + language.slice(1)
+                };
+            }
+            
             const jokeIndex = Math.floor(Math.random() * languageJokes.length);
             const joke = languageJokes[jokeIndex];
             
@@ -303,6 +370,21 @@
                 translation: typeof joke === 'object' ? joke.translation : null,
                 language: language.charAt(0).toUpperCase() + language.slice(1)
             };
+        }
+        
+        // Fetch more jokes when user clicks (to build up collection)
+        let fetchInProgress = false;
+        async function fetchMoreJokesOnClick() {
+            if (fetchInProgress) return;
+            fetchInProgress = true;
+            
+            const currentCount = getTotalJokeCount();
+            if (currentCount < 1000) {
+                await fetchAndAddJokes('english', 20);
+                // Update display to show new count
+                console.log(`Total jokes: ${getTotalJokeCount()}`);
+            }
+            fetchInProgress = false;
         }
         
         function displayJoke(joke) {
@@ -316,12 +398,32 @@
             } else {
                 translationDiv.style.display = 'none';
             }
+            
+            // Update joke counter
+            updateJokeCounter();
+        }
+        
+        function updateJokeCounter() {
+            const total = getTotalJokeCount();
+            const filipino = jokes.filipino ? jokes.filipino.length : 0;
+            const bisaya = jokes.bisaya ? jokes.bisaya.length : 0;
+            const english = jokes.english ? jokes.english.length : 0;
+            
+            const counterDiv = document.getElementById('jokeCounter');
+            counterDiv.innerHTML = `📚 Total Jokes: <strong>${total}</strong> (Filipino: ${filipino} | Bisaya: ${bisaya} | English: ${english})`;
+            
+            if (total >= 1000) {
+                counterDiv.style.color = '#4ecdc4';
+                counterDiv.innerHTML += ' 🎉';
+            }
         }
         
         function getNewJoke() {
             const joke = getRandomJoke();
             displayJoke(joke);
             createSparkles();
+            // Fetch more jokes in background to build collection
+            fetchMoreJokesOnClick();
         }
         
         function createSparkles() {
@@ -410,6 +512,23 @@
             const dailyJoke = getDailyJoke();
             displayJoke(dailyJoke);
             createSparkles();
+            updateJokeCounter(); // Initialize counter
+            
+            // Start fetching jokes to build up to 1000+
+            // Fetch in batches to avoid overwhelming the APIs
+            let batchCount = 0;
+            const fetchBatch = async () => {
+                if (getTotalJokeCount() < 1000 && batchCount < 50) {
+                    await fetchAndAddJokes('english', 20);
+                    updateJokeCounter(); // Update counter after fetching
+                    batchCount++;
+                    setTimeout(fetchBatch, 2000); // Wait 2 seconds between batches
+                } else {
+                    console.log(`Joke collection complete! Total: ${getTotalJokeCount()} jokes`);
+                    updateJokeCounter(); // Final update
+                }
+            };
+            setTimeout(fetchBatch, 2000);
         };
     </script>
 </body>
