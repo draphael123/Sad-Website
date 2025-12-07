@@ -5,35 +5,269 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Momshies Website</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            padding: 20px;
         }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
         .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
+            animation: bounceIn 0.8s ease;
         }
-        .sad-face {
-            font-size: 120px;
-            margin-bottom: 20px;
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
-        .test-text {
-            font-size: 18px;
-            color: #666;
+        
+        h1 {
+            font-size: 3.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #eb4d4b);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 3s ease infinite;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .emoji {
+            font-size: 100px;
+            margin: 20px 0;
+            animation: rotate 2s ease-in-out infinite;
+        }
+        
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            75% { transform: rotate(10deg) scale(1.1); }
+        }
+        
+        .joke-container {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 5px solid #ff6b6b;
+        }
+        
+        .joke-label {
+            font-size: 1.2em;
+            color: #8b4513;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .joke-text {
+            font-size: 1.8em;
+            color: #2c3e50;
+            line-height: 1.6;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .joke-language {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
             margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+        
+        .sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .sparkle {
+            position: absolute;
+            color: #ffd700;
+            font-size: 20px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+            50% { opacity: 1; transform: translateY(-50px) scale(1); }
         }
     </style>
 </head>
 <body>
+    <div class="sparkles" id="sparkles"></div>
     <div class="container">
-        <div class="sad-face">😢</div>
-        <div class="test-text">This is a test website</div>
+        <h1>Momshies Website</h1>
+        <div class="emoji">😄🎉✨</div>
+        
+        <div class="joke-container">
+            <div class="joke-label">Daily Joke of the Day</div>
+            <div class="joke-text" id="jokeText">Loading joke...</div>
+            <div class="joke-language" id="jokeLanguage"></div>
+        </div>
+        
+        <button class="refresh-btn" onclick="getNewJoke()">Get New Joke! 🎭</button>
     </div>
+    
+    <script>
+        const jokes = {
+            filipino: [
+                "Bakit hindi pwedeng maglaro ng hide and seek ang mga baka? Kasi lahat sila, 'Moo!'",
+                "Ano ang tawag sa kalabaw na nasa loob ng elevator? Kalabaw na elevator!",
+                "Bakit masaya ang kalendaryo? Kasi marami siyang dates!",
+                "Ano ang favorite subject ng mga isda? Math! Kasi full of numbers ang dagat!",
+                "Bakit hindi pwedeng mag-joke ang mga bato? Kasi walang sense of humor!"
+            ],
+            bisaya: [
+                "Ngano man dili pwede maglaro ang mga baka? Kay tanan sila, 'Moo!'",
+                "Unsa man ang tawag sa kalabaw nga naa sa sulod sa elevator? Kalabaw nga elevator!",
+                "Ngano man masaya ang kalendaryo? Kay daghan siya'g dates!",
+                "Unsa man ang paborito nga subject sa mga isda? Math! Kay puno sa numbers ang dagat!",
+                "Ngano man dili pwede mag-joke ang mga bato? Kay walay sense of humor!"
+            ],
+            english: [
+                "Why don't scientists trust atoms? Because they make up everything!",
+                "Why did the scarecrow win an award? He was outstanding in his field!",
+                "Why don't eggs tell jokes? They'd crack each other up!",
+                "What do you call a fake noodle? An impasta!",
+                "Why did the math book look so sad? Because it had too many problems!",
+                "What's the best thing about Switzerland? I don't know, but the flag is a big plus!",
+                "Why don't skeletons fight each other? They don't have the guts!",
+                "What do you call a bear with no teeth? A gummy bear!"
+            ]
+        };
+        
+        function getDayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+        
+        function getDailyJoke() {
+            const dayOfYear = getDayOfYear();
+            const languages = ['filipino', 'bisaya', 'english'];
+            const language = languages[dayOfYear % 3];
+            const languageJokes = jokes[language];
+            const jokeIndex = dayOfYear % languageJokes.length;
+            
+            return {
+                text: languageJokes[jokeIndex],
+                language: language.charAt(0).toUpperCase() + language.slice(1)
+            };
+        }
+        
+        function getRandomJoke() {
+            const languages = ['filipino', 'bisaya', 'english'];
+            const language = languages[Math.floor(Math.random() * languages.length)];
+            const languageJokes = jokes[language];
+            const jokeIndex = Math.floor(Math.random() * languageJokes.length);
+            
+            return {
+                text: languageJokes[jokeIndex],
+                language: language.charAt(0).toUpperCase() + language.slice(1)
+            };
+        }
+        
+        function displayJoke(joke) {
+            document.getElementById('jokeText').textContent = joke.text;
+            document.getElementById('jokeLanguage').textContent = joke.language;
+        }
+        
+        function getNewJoke() {
+            const joke = getRandomJoke();
+            displayJoke(joke);
+            createSparkles();
+        }
+        
+        function createSparkles() {
+            const sparklesContainer = document.getElementById('sparkles');
+            for (let i = 0; i < 10; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.textContent = '✨';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 2 + 's';
+                sparklesContainer.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 2000);
+            }
+        }
+        
+        // Load daily joke on page load
+        window.onload = function() {
+            const dailyJoke = getDailyJoke();
+            displayJoke(dailyJoke);
+            createSparkles();
+        };
+    </script>
 </body>
 </html>
-
