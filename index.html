@@ -157,6 +157,50 @@
             0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
             50% { opacity: 1; transform: translateY(-50px) scale(1); }
         }
+        
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+        }
+        
+        .music-label {
+            font-size: 0.9em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .youtube-embed {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .music-toggle {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        }
+        
+        .music-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -172,6 +216,18 @@
         </div>
         
         <button class="refresh-btn" onclick="getNewJoke()">Get New Joke! 🎭</button>
+    </div>
+    
+    <div class="music-player">
+        <div class="music-label">🎵 Background Music</div>
+        <iframe 
+            id="youtubePlayer"
+            class="youtube-embed"
+            src="https://www.youtube.com/embed/VmgrOGVcehE?autoplay=1&loop=1&playlist=VmgrOGVcehE&mute=1&controls=1&modestbranding=1&rel=0&enablejsapi=1"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+        </iframe>
+        <button class="music-toggle" onclick="toggleMusic()" id="musicToggle">🔊 Unmute</button>
     </div>
     
     <script>
@@ -259,6 +315,30 @@
                 setTimeout(() => {
                     sparkle.remove();
                 }, 2000);
+            }
+        }
+        
+        let isMuted = true; // Start muted for autoplay to work
+        
+        function toggleMusic() {
+            const iframe = document.getElementById('youtubePlayer');
+            const toggleBtn = document.getElementById('musicToggle');
+            
+            // Use YouTube iframe API to control mute/unmute
+            try {
+                iframe.contentWindow.postMessage('{"event":"command","func":"' + (isMuted ? 'unMute' : 'mute') + '","args":""}', '*');
+                isMuted = !isMuted;
+                toggleBtn.textContent = isMuted ? '🔊 Unmute' : '🔇 Mute';
+            } catch(e) {
+                // Fallback: reload iframe with different mute setting
+                const currentSrc = iframe.src;
+                if (isMuted) {
+                    iframe.src = currentSrc.replace('&mute=1', '&mute=0');
+                } else {
+                    iframe.src = currentSrc.replace('&mute=0', '&mute=1');
+                }
+                isMuted = !isMuted;
+                toggleBtn.textContent = isMuted ? '🔊 Unmute' : '🔇 Mute';
             }
         }
         
