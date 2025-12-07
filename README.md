@@ -1,25 +1,43 @@
 # Momshies Website
 
-A simple website with just a sad face.
+A joyful, colorful website featuring daily jokes in Filipino, Bisaya, and English, with background music!
 
-## Deployment Instructions
+## Features
 
-### GitHub Deployment
+- 🎨 Colorful animated gradient background
+- 😄 Daily jokes in Filipino, Bisaya, and English
+- 🌐 Automatic translations for Filipino and Bisaya jokes
+- 🎵 YouTube background music player
+- ✨ Interactive animations and sparkles
 
-1. Create a new repository on GitHub (https://github.com/new)
-2. Name it something like "momshies-website" or "dumb-website2"
-3. Don't initialize it with a README (since we already have one)
-4. Run these commands to push your code:
+## Making the Website Publicly Viewable
 
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-git branch -M main
-git push -u origin main
-```
+Your website is already on GitHub at: https://github.com/draphael123/Sad-Website.git
 
-### Vercel Deployment
+### Deploy to Vercel (Easiest Method - Recommended)
 
-#### Option 1: Using Vercel CLI (Recommended)
+**Step 1: Sign up/Login to Vercel**
+- Go to https://vercel.com
+- Sign in with your GitHub account (recommended for easy integration)
+
+**Step 2: Import Your Repository**
+1. Click "Add New Project" or "Import Project"
+2. Select your GitHub repository: `draphael123/Sad-Website`
+3. Vercel will automatically detect it's a static HTML site
+
+**Step 3: Deploy**
+1. Click "Deploy" (no configuration needed - Vercel auto-detects static sites)
+2. Wait 1-2 minutes for deployment
+3. Your site will be live at a URL like: `sad-website.vercel.app` or `sad-website-[your-username].vercel.app`
+
+**Step 4: Share Your Website**
+- Your website is now publicly accessible!
+- Anyone can visit the Vercel URL you received
+- Future pushes to GitHub will automatically redeploy your site
+
+### Alternative: Using Vercel CLI
+
+If you prefer using the command line:
 
 1. Install Vercel CLI:
    ```bash
@@ -41,11 +59,15 @@ git push -u origin main
    vercel --prod
    ```
 
-#### Option 2: Using Vercel Dashboard
+### Custom Domain (Optional)
 
-1. Go to https://vercel.com and sign in
-2. Click "Add New Project"
-3. Import your GitHub repository
-4. Vercel will automatically detect it's a static site and deploy it
-5. Your site will be live at a URL like `your-project.vercel.app`
+After deploying to Vercel, you can add a custom domain:
+1. Go to your project settings in Vercel
+2. Click "Domains"
+3. Add your custom domain (e.g., `momshies.com`)
+4. Follow the DNS configuration instructions
+
+## Local Development
+
+Simply open `index.html` in your web browser to view the website locally.
 

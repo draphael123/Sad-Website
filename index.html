@@ -103,6 +103,18 @@
             margin: 20px 0;
         }
         
+        .joke-translation {
+            font-size: 1.3em;
+            color: #555;
+            line-height: 1.5;
+            font-style: italic;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #4ecdc4;
+        }
+        
         .joke-language {
             display: inline-block;
             background: #ff6b6b;
@@ -212,6 +224,7 @@
         <div class="joke-container">
             <div class="joke-label">Daily Joke of the Day</div>
             <div class="joke-text" id="jokeText">Loading joke...</div>
+            <div class="joke-translation" id="jokeTranslation" style="display: none;"></div>
             <div class="joke-language" id="jokeLanguage"></div>
         </div>
         
@@ -233,28 +246,28 @@
     <script>
         const jokes = {
             filipino: [
-                "Bakit hindi pwedeng maglaro ng hide and seek ang mga baka? Kasi lahat sila, 'Moo!'",
-                "Ano ang tawag sa kalabaw na nasa loob ng elevator? Kalabaw na elevator!",
-                "Bakit masaya ang kalendaryo? Kasi marami siyang dates!",
-                "Ano ang favorite subject ng mga isda? Math! Kasi full of numbers ang dagat!",
-                "Bakit hindi pwedeng mag-joke ang mga bato? Kasi walang sense of humor!"
+                { text: "Bakit hindi pwedeng maglaro ng hide and seek ang mga baka? Kasi lahat sila, 'Moo!'", translation: "Why can't cows play hide and seek? Because they all say 'Moo!'" },
+                { text: "Ano ang tawag sa kalabaw na nasa loob ng elevator? Kalabaw na elevator!", translation: "What do you call a carabao inside an elevator? A carabao in an elevator!" },
+                { text: "Bakit masaya ang kalendaryo? Kasi marami siyang dates!", translation: "Why is the calendar happy? Because it has many dates!" },
+                { text: "Ano ang favorite subject ng mga isda? Math! Kasi full of numbers ang dagat!", translation: "What's the fish's favorite subject? Math! Because the ocean is full of numbers!" },
+                { text: "Bakit hindi pwedeng mag-joke ang mga bato? Kasi walang sense of humor!", translation: "Why can't stones tell jokes? Because they have no sense of humor!" }
             ],
             bisaya: [
-                "Ngano man dili pwede maglaro ang mga baka? Kay tanan sila, 'Moo!'",
-                "Unsa man ang tawag sa kalabaw nga naa sa sulod sa elevator? Kalabaw nga elevator!",
-                "Ngano man masaya ang kalendaryo? Kay daghan siya'g dates!",
-                "Unsa man ang paborito nga subject sa mga isda? Math! Kay puno sa numbers ang dagat!",
-                "Ngano man dili pwede mag-joke ang mga bato? Kay walay sense of humor!"
+                { text: "Ngano man dili pwede maglaro ang mga baka? Kay tanan sila, 'Moo!'", translation: "Why can't cows play? Because they all say 'Moo!'" },
+                { text: "Unsa man ang tawag sa kalabaw nga naa sa sulod sa elevator? Kalabaw nga elevator!", translation: "What do you call a carabao inside an elevator? A carabao in an elevator!" },
+                { text: "Ngano man masaya ang kalendaryo? Kay daghan siya'g dates!", translation: "Why is the calendar happy? Because it has many dates!" },
+                { text: "Unsa man ang paborito nga subject sa mga isda? Math! Kay puno sa numbers ang dagat!", translation: "What's the fish's favorite subject? Math! Because the ocean is full of numbers!" },
+                { text: "Ngano man dili pwede mag-joke ang mga bato? Kay walay sense of humor!", translation: "Why can't stones tell jokes? Because they have no sense of humor!" }
             ],
             english: [
-                "Why don't scientists trust atoms? Because they make up everything!",
-                "Why did the scarecrow win an award? He was outstanding in his field!",
-                "Why don't eggs tell jokes? They'd crack each other up!",
-                "What do you call a fake noodle? An impasta!",
-                "Why did the math book look so sad? Because it had too many problems!",
-                "What's the best thing about Switzerland? I don't know, but the flag is a big plus!",
-                "Why don't skeletons fight each other? They don't have the guts!",
-                "What do you call a bear with no teeth? A gummy bear!"
+                { text: "Why don't scientists trust atoms? Because they make up everything!", translation: null },
+                { text: "Why did the scarecrow win an award? He was outstanding in his field!", translation: null },
+                { text: "Why don't eggs tell jokes? They'd crack each other up!", translation: null },
+                { text: "What do you call a fake noodle? An impasta!", translation: null },
+                { text: "Why did the math book look so sad? Because it had too many problems!", translation: null },
+                { text: "What's the best thing about Switzerland? I don't know, but the flag is a big plus!", translation: null },
+                { text: "Why don't skeletons fight each other? They don't have the guts!", translation: null },
+                { text: "What do you call a bear with no teeth? A gummy bear!", translation: null }
             ]
         };
         
@@ -271,9 +284,11 @@
             const language = languages[dayOfYear % 3];
             const languageJokes = jokes[language];
             const jokeIndex = dayOfYear % languageJokes.length;
+            const joke = languageJokes[jokeIndex];
             
             return {
-                text: languageJokes[jokeIndex],
+                text: typeof joke === 'string' ? joke : joke.text,
+                translation: typeof joke === 'object' ? joke.translation : null,
                 language: language.charAt(0).toUpperCase() + language.slice(1)
             };
         }
@@ -283,9 +298,11 @@
             const language = languages[Math.floor(Math.random() * languages.length)];
             const languageJokes = jokes[language];
             const jokeIndex = Math.floor(Math.random() * languageJokes.length);
+            const joke = languageJokes[jokeIndex];
             
             return {
-                text: languageJokes[jokeIndex],
+                text: typeof joke === 'string' ? joke : joke.text,
+                translation: typeof joke === 'object' ? joke.translation : null,
                 language: language.charAt(0).toUpperCase() + language.slice(1)
             };
         }
@@ -293,6 +310,14 @@
         function displayJoke(joke) {
             document.getElementById('jokeText').textContent = joke.text;
             document.getElementById('jokeLanguage').textContent = joke.language;
+            
+            const translationDiv = document.getElementById('jokeTranslation');
+            if (joke.translation) {
+                translationDiv.textContent = `Translation: ${joke.translation}`;
+                translationDiv.style.display = 'block';
+            } else {
+                translationDiv.style.display = 'none';
+            }
         }
         
         function getNewJoke() {
